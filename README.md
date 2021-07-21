@@ -1,6 +1,6 @@
-<center>
+
 # Exploring Covid-19
-  </center>
+
 <hr>
 <div>
   
