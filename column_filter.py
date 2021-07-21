@@ -1,11 +1,18 @@
-# Separating some columns to make different tables
+"""  
+Separating some columns of the original dataset to create two separate tables in SQL
+The first one containing the cases and deaths information
+and the second one containing the vaccinations and other personal informations
 
+@micheldearaujo     created at SUN 2021 July 18 20:30
+
+"""
+# Importing the used libraries
 import pandas as pd
 
+# Loading the dataset from a CSV file
 covid_data = pd.read_csv('owid-covid-data.csv')
 
-print(covid_data)
-
+# Checking out the columns names
 print(covid_data.columns)
 
 # Creating a table only for the cases and deaths
@@ -20,7 +27,7 @@ deaths = covid_data[['iso_code', 'continent', 'location', 'date', 'population','
        'weekly_icu_admissions_per_million', 'weekly_hosp_admissions',
        'weekly_hosp_admissions_per_million']]
 
-# Creating another table only for the tests and vaccination and other information about the pacient
+# Creating another table only for the tests and vaccination and other informations
 vaccines = covid_data[['iso_code', 'continent', 'location', 'date', 'population', 'new_tests', 'total_tests',
        'total_tests_per_thousand', 'new_tests_per_thousand',
        'new_tests_smoothed', 'new_tests_smoothed_per_thousand',
@@ -35,5 +42,6 @@ vaccines = covid_data[['iso_code', 'continent', 'location', 'date', 'population'
        'male_smokers', 'handwashing_facilities', 'hospital_beds_per_thousand',
        'life_expectancy', 'human_development_index', 'excess_mortality']]
 
-#deaths.to_csv('./data/deaths.csv', index=False)
+# Exporting the tables
+deaths.to_csv('./data/deaths.csv', index=False)
 vaccines.to_csv('./data/vaccination.csv', index=False)
