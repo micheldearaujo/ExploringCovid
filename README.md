@@ -1,5 +1,5 @@
 # Exploring Covid-19
-<div style="text-align: justify">
+<div>
 <hr>
   
   <p>
