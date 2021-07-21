@@ -200,7 +200,10 @@ FROM cum_vacc;
 
 
 
--------- \\ Lets create some views to save tables for later visualizations in Tableau // --------
+-------- \\ Lets exports some queries for tables to create visualizations in Tableau // --------
+
+-- To make sure that all data you be well-read in Tableau, lets change the NULL values to zero.
+
 
 -- 1. Global new cases, new deaths, global lethallity rate
 SELECT sum(new_cases::NUMERIC) AS "global_new_cases",
@@ -218,9 +221,9 @@ ORDER BY "total_deaths" DESC;
 
 -- 3. Total cases, deaths and vaccinations in the world by country
 SELECT d.location AS "country",
-                sum(new_deaths::NUMERIC) AS "total_deaths",
-                sum(new_cases::NUMERIC) AS "total cases",
-                sum(v.new_vaccinations::NUMERIC) AS "total_vaccinations"
+                COALESCE(sum(new_deaths::NUMERIC), 0) AS "total_deaths",
+                COALESCE(sum(new_cases::NUMERIC), 0) AS "total cases",
+                COALESCE(sum(v.new_vaccinations::NUMERIC), 0) AS "total_vaccinations"
 FROM death AS d
 JOIN vaccine AS v USING("location", "date")
 WHERE d.continent IS NOT NULL
@@ -229,19 +232,20 @@ ORDER BY d.location;
 
 
 -- 4. Total cases, deaths, vacctination and vaccination percentage in Brazil through time
-
+DROP VIEW cum_vacc;
 CREATE VIEW cum_vacc AS 
-    SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, d.new_deaths, d.new_cases,
-        sum(v.new_vaccinations::NUMERIC)
+    SELECT d.continent, d.location, d.date, d.population,
+        COALESCE(v.new_vaccinations::NUMERIC, 0) AS "new_vaccinations",
+        COALESCE(d.new_deaths::NUMERIC, 0) AS "new_deaths",
+        COALESCE(d.new_cases::NUMERIC, 0) AS "new_cases",
+        COALESCE(sum(v.new_vaccinations::NUMERIC)
             OVER (PARTITION BY d.location
-                  ORDER BY d.location, d.date) AS "cumulative_vaccination"
+                  ORDER BY d.location, d.date), 0) AS "cumulative_vaccination"
 
     FROM death AS d
     JOIN vaccine AS v USING("location", "date")
     WHERE d.continent IS NOT NULL
     ORDER BY d.location, d.date;
-
-DROP VIEW cum_vacc
 
 
 SELECT "date", "location", new_cases, new_deaths, new_vaccinations, cumulative_vaccination, (cumulative_vaccination::NUMERIC/population::NUMERIC) AS "percentage_vaccinated"
