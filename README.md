@@ -27,6 +27,7 @@ Summarising, I have answered the following questions: <br>
 <li>Until now, what are the *infection rate* (percent of population that has been infect by COVID-19) country-wise?</li>
 <li>Considering **Brazil**, what looks likes the evolution of new cases and the percent of population vaccinated?</li>
 </ol>
+<br>
 
 For the visualization I have exported the above queries answers in xmlx formart to make a Dashboard using Tablaeu. Bellow you can see the static Dashboard image. For the interactive view of this Dashboard, please visit [my page](https://public.tableau.com/app/profile/michel.de.ara.jo/viz/COVID-19innumbers_16268902575460/Dashboard1?publish=yes) at Tableau Public. <br>
 <hr>
