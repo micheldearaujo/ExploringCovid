@@ -145,16 +145,18 @@ ORDER BY LOCATION, date;
 SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations
 FROM death AS d
 JOIN vaccine AS v USING("location", "date")
+WHERE d.continent IS NOT NULL
 ORDER BY LOCATION, date;
 
 -- Now lets create the cumulative sum
 SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations,
         sum(v.new_vaccinations::NUMERIC)
             OVER (PARTITION BY d.location
-                    ORDER BY d.location, d.date) AS "cumulative_vaccination"
+                  ORDER BY d.location, d.date) AS "cumulative_vaccination"
             
 FROM death AS d
 JOIN vaccine AS v USING("location", "date")
+WHERE d.continent IS NOT NULL
 ORDER BY LOCATION, date;
 
 -- Now we now how many people were vaccinated each day and the total vaccinated people at a specific date.
@@ -163,15 +165,88 @@ ORDER BY LOCATION, date;
 SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations,
         sum(v.new_vaccinations::NUMERIC)
             OVER (PARTITION BY d.location
-                    ORDER BY d.location, d.date) AS "cumulative_vaccination",
+                  ORDER BY d.location, d.date) AS "cumulative_vaccination",
                     
                     -- the method bellow is quite ugly to write although it works. But lets re-write this in a
                     -- reader-friendly way
         (sum(v.new_vaccinations::NUMERIC)
             OVER (PARTITION BY d.location
-                    ORDER BY d.location, d.date)/d.population::NUMERIC)*100 AS "percentage_vaccinated"
+                  ORDER BY d.location, d.date)/d.population::NUMERIC)*100 AS "percentage_vaccinated"
             
 FROM death AS d
 JOIN vaccine AS v USING("location", "date")
+WHERE d.continent IS NOT NULL
 ORDER BY LOCATION, date;
 
+-- We can use a VIEW
+
+CREATE VIEW cum_vacc AS 
+    SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations,
+        sum(v.new_vaccinations::NUMERIC)
+            OVER (PARTITION BY d.location
+                  ORDER BY d.location, d.date) AS "cumulative_vaccination"
+
+    FROM death AS d
+    JOIN vaccine AS v USING("location", "date")
+    WHERE d.continent IS NOT NULL
+    ORDER BY LOCATION, date;
+   
+ 
+SELECT *, (cumulative_vaccination::NUMERIC/population::NUMERIC) AS "percentage_vaccinated"
+FROM cum_vacc;
+
+-- We get the same result.
+
+
+
+
+-------- \\ Lets create some views to save tables for later visualizations in Tableau // --------
+
+-- 1. Global new cases, new deaths, global lethallity rate
+SELECT sum(new_cases::NUMERIC) AS "global_new_cases",
+                sum(new_deaths::NUMERIC) AS "total_new_deaths",
+                round(sum(new_deaths::NUMERIC)/sum(new_cases::NUMERIC), 2)*100 AS "global_lethallity_rate"
+FROM death
+WHERE continent IS NOT NULL
+
+-- 2. Total death count by continent.
+SELECT "continent", sum(new_deaths::NUMERIC) AS "total_deaths"
+FROM death
+WHERE continent IS NOT NULL
+GROUP BY continent
+ORDER BY "total_deaths" DESC;
+
+-- 3. Total cases, deaths and vaccinations in the world by country
+SELECT d.location AS "country",
+                sum(new_deaths::NUMERIC) AS "total_deaths",
+                sum(new_cases::NUMERIC) AS "total cases",
+                sum(v.new_vaccinations::NUMERIC) AS "total_vaccinations"
+FROM death AS d
+JOIN vaccine AS v USING("location", "date")
+WHERE d.continent IS NOT NULL
+GROUP BY "location"
+ORDER BY d.location;
+
+
+-- 4. Total cases, deaths, vacctination and vaccination percentage in Brazil through time
+
+CREATE VIEW cum_vacc AS 
+    SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, d.new_deaths, d.new_cases,
+        sum(v.new_vaccinations::NUMERIC)
+            OVER (PARTITION BY d.location
+                  ORDER BY d.location, d.date) AS "cumulative_vaccination"
+
+    FROM death AS d
+    JOIN vaccine AS v USING("location", "date")
+    WHERE d.continent IS NOT NULL
+    ORDER BY d.location, d.date;
+
+DROP VIEW cum_vacc
+
+
+SELECT "date", "location", new_cases, new_deaths, new_vaccinations, cumulative_vaccination, (cumulative_vaccination::NUMERIC/population::NUMERIC) AS "percentage_vaccinated"
+FROM cum_vacc
+WHERE "location" = 'Brazil'
+ORDER BY "date";
+
+-- 5. 
