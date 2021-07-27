@@ -29,7 +29,7 @@ Summarising, I have answered the following questions: <br>
 </ol>
 <br>
 
-For the visualization I have exported the above queries answers in xmlx formart to make a Dashboard using Tablaeu. Bellow you can see the static Dashboard image. For the interactive view of this Dashboard, please visit [my page](https://public.tableau.com/app/profile/michel.de.ara.jo/viz/COVID-19innumbers_16268902575460/Dashboard1?publish=yes) at Tableau Public. <br>
+For the visualization I have exported the above queries answers in .xmlx format to make a Dashboard using Tablaeu. Bellow you can see the static Dashboard image. For the interactive view of this Dashboard, please visit [my page](https://public.tableau.com/app/profile/michel.de.ara.jo/viz/COVID-19innumbers_16268902575460/Dashboard1?publish=yes) at Tableau Public. <br>
 
 <p align="center">
 <img width="480" height="320" src="images/eda_dashboard.png">
