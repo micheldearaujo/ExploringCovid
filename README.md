@@ -17,17 +17,18 @@ I hope to exercise and improve my SQL skills. Feel free to give your feedback. T
 ## The data 
 
 This is a time series dataset, that contains daily updated of the worldwide number of new cases, total cases, new deaths, total deaths, new vaccinations, total vaccinations and more.
-Bellow one can see a sample of the data set.
+Bellow one can see a sample of the data set. The original file is a .csv containing all the information. For a better performance when querying, it was split into two separated tables, one with all the cases and deaths information and the
+other containing the vaccinations and other information.
 
+Deaths table
 <p align="center">
 <img width="1280" height="209" src="images/deaths.jpeg">
 
+Vaccination table
 <p align="center">
 <img width="1280" height="209" src="images/vaccines.jpeg">
 
 
-The original file is a .csv containing all the information. For a better performance when querying, it was split into two separated tables, one with all the cases and deaths information and the
-other containing the vaccinations and other information.
 
 <div>
 
@@ -37,9 +38,62 @@ In this first part of the project will performed a simple exploratory data analy
 Summarising, the following questions were answered: <br>
 <ol>
 <li>What are the total cases, deaths and the <i>lethallity rate</i> (percent of people who died after get infected by COVID-19) in the world?</li>
+This question can be answered by simple querying the death table and make a division of the total cases and the new deaths.
+
+    SELECT sum(new_cases::NUMERIC) AS "global_total_cases",
+                    sum(new_deaths::NUMERIC) AS "total_deaths",
+                    round(sum(new_deaths::NUMERIC)/sum(new_cases::NUMERIC), 2)*100 AS "global_lethallity_rate"
+    FROM "Covid19".death
+    WHERE continent IS NOT NULL;
+
 <li>Considering each of the continents, how many people have passed way until now (2021/07/21)?</li>
+
+This question can be answered using a GROUP BY operation on the continent column. Note that it is necessary to imply the condition that the continent must be not null,
+for in this table some records brings the "location" as the continent, and when it happens, the "continent" column is null.
+
+    SELECT "continent", sum(new_deaths::NUMERIC) AS "total_deaths"
+    FROM "Covid19".death
+    WHERE continent IS NOT NULL
+    GROUP BY continent
+    ORDER BY "total_deaths" DESC;
+
 <li>Until now, how much is the <i>infection rate</i> (percent of population that has been infect by COVID-19) country-wise?</li>
+
+
+    SELECT d.location AS "country",
+                    COALESCE(sum(new_deaths::NUMERIC), 0) AS "total_deaths",
+                    COALESCE(sum(new_cases::NUMERIC), 0) AS "total cases",
+                    COALESCE(sum(v.new_vaccinations::NUMERIC), 0) AS "total_vaccinations",
+                    COALESCE((sum(new_cases::NUMERIC)/avg(d.population::NUMERIC))*100, 0) AS "infection_rate"
+    FROM "Covid19".death AS d
+    JOIN "Covid19".vaccine AS v USING("location", "date")
+    WHERE d.continent IS NOT NULL
+    GROUP BY "location"
+    ORDER BY d.location;
+
 <li>Considering <b>Brazil</b>, what looks likes the evolution of new cases and the percent of population vaccinated?</li>
+
+    DROP VIEW if exists cum_vacc;
+    CREATE VIEW cum_vacc AS 
+        SELECT d.continent, d.location, d.date, d.population,
+            COALESCE(v.new_vaccinations::NUMERIC, 0) AS "new_vaccinations",
+            COALESCE(d.new_deaths::NUMERIC, 0) AS "new_deaths",
+            COALESCE(d.new_cases::NUMERIC, 0) AS "new_cases",
+            COALESCE(sum(v.new_vaccinations::NUMERIC)
+                OVER (PARTITION BY d.location
+                      ORDER BY d.location, d.date), 0) AS "cumulative_vaccination"
+    
+        FROM "Covid19".death AS d
+        JOIN "Covid19".vaccine AS v USING("location", "date")
+        WHERE d.continent IS NOT NULL
+        ORDER BY d.location, d.date;
+    
+    
+    SELECT "date", "location", new_cases, new_deaths, new_vaccinations, cumulative_vaccination, (cumulative_vaccination::NUMERIC/population::NUMERIC)*100 AS "percentage_vaccinated"
+    FROM cum_vacc
+    WHERE "location" = 'Brazil'
+    ORDER BY "date";
+
 </ol>
 <br>
 

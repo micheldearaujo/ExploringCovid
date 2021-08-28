@@ -16,7 +16,7 @@ SELECT * FROM vaccine;
 -- Lets take a look at our tables
 
 SELECT *    -- Ordering the death data by the location and date
-FROM death
+FROM "Covid19".death
 ORDER BY 3, 4;
 
 SELECT *    -- Ordering the vaccination data by the location and date
@@ -39,7 +39,7 @@ ORDER BY "location", "date";
 
 SELECT "location", "date", new_cases, total_cases, total_deaths, population,
     concat((total_deaths::FLOAT/total_cases::FLOAT)*100, '%') AS "lethality_rate"
-FROM death
+FROM "Covid19".death
 WHERE continent IS NOT NULL
 ORDER BY "location", "date";
 
@@ -228,12 +228,12 @@ FROM cum_vacc;
 SELECT sum(new_cases::NUMERIC) AS "global_total_cases",
                 sum(new_deaths::NUMERIC) AS "total_deaths",
                 round(sum(new_deaths::NUMERIC)/sum(new_cases::NUMERIC), 2)*100 AS "global_lethallity_rate"
-FROM death
-WHERE continent IS NOT NULL
+FROM "Covid19".death
+WHERE continent IS NOT NULL;
 
 -- 2. Total death count by continent.
 SELECT "continent", sum(new_deaths::NUMERIC) AS "total_deaths"
-FROM death
+FROM "Covid19".death
 WHERE continent IS NOT NULL
 GROUP BY continent
 ORDER BY "total_deaths" DESC;
@@ -244,15 +244,15 @@ SELECT d.location AS "country",
                 COALESCE(sum(new_cases::NUMERIC), 0) AS "total cases",
                 COALESCE(sum(v.new_vaccinations::NUMERIC), 0) AS "total_vaccinations",
                 COALESCE((sum(new_cases::NUMERIC)/avg(d.population::NUMERIC))*100, 0) AS "infection_rate"
-FROM death AS d
-JOIN vaccine AS v USING("location", "date")
+FROM "Covid19".death AS d
+JOIN "Covid19".vaccine AS v USING("location", "date")
 WHERE d.continent IS NOT NULL
 GROUP BY "location"
 ORDER BY d.location;
 
 
 -- 4. Total cases, deaths, vacctination and vaccination percentage in Brazil through time
-DROP VIEW cum_vacc;
+DROP VIEW IF EXISTS cum_vacc;
 CREATE VIEW cum_vacc AS 
     SELECT d.continent, d.location, d.date, d.population,
         COALESCE(v.new_vaccinations::NUMERIC, 0) AS "new_vaccinations",
@@ -262,8 +262,8 @@ CREATE VIEW cum_vacc AS
             OVER (PARTITION BY d.location
                   ORDER BY d.location, d.date), 0) AS "cumulative_vaccination"
 
-    FROM death AS d
-    JOIN vaccine AS v USING("location", "date")
+    FROM "Covid19".death AS d
+    JOIN "Covid19".vaccine AS v USING("location", "date")
     WHERE d.continent IS NOT NULL
     ORDER BY d.location, d.date;
 
