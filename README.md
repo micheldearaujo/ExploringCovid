@@ -20,10 +20,10 @@ This is a time series dataset, that contains daily updated of the worldwide numb
 Bellow one can see a sample of the data set.
 
 <p align="center">
-<img width="480" height="320" src="images/deaths.jpeg">
+<img width="1280" height="209" src="images/deaths.jpeg">
 
 <p align="center">
-<img width="480" height="320" src="images/vaccines.jpeg">
+<img width="1280" height="209" src="images/vaccines.jpeg">
 
 
 The original file is a .csv containing all the information. For a better performance when querying, it was split into two separated tables, one with all the cases and deaths information and the
