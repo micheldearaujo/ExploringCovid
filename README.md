@@ -37,7 +37,7 @@ Vaccination table
 In this first part of the project will performed a simple exploratory data analysis on the data to discover some numbers about the COVID-19 pandemic in the World, and, specifically, in Brazil. <br>
 Summarising, the following questions were answered: <br>
 <ol>
-<li> **What are the total cases, deaths and the <i>lethallity rate</i> (percent of people who died after get infected by COVID-19) in the world?** </li>
+<li> <b>What are the total cases, deaths and the <i>lethallity rate</i> (percent of people who died after get infected by COVID-19) in the world?</b> </li>
 This question can be answered by simple querying the death table and make a division of the total cases and the new deaths.
 
     SELECT sum(new_cases::NUMERIC) AS "global_total_cases",
@@ -46,7 +46,7 @@ This question can be answered by simple querying the death table and make a divi
     FROM "Covid19".death
     WHERE continent IS NOT NULL;
 
-<li> **Considering each of the continents, how many people have passed way until now (2021/07/21)?** </li>
+<li> <b>Considering each of the continents, how many people have passed way until now (2021/07/21)?</b> </li>
 
 This question can be answered using a GROUP BY operation on the continent column. Note that it is necessary to imply the condition that the continent must be not null,
 for in this table some records brings the "location" as the continent, and when it happens, the "continent" column is null.
@@ -57,7 +57,7 @@ for in this table some records brings the "location" as the continent, and when 
     GROUP BY continent
     ORDER BY "total_deaths" DESC;
 
-<li> **Until now, what is the <i>infection rate</i> (percent of population that has been infect by COVID-19) country-wise?** </li>
+<li> <b>Until now, what is the <i>infection rate</i> (percent of population that has been infect by COVID-19) country-wise?</b> </li>
 
 This question is not so different from the previous one. It is necessary to use a GROUP BY location. The new feature of this query
 is that if we want to see the relation of the infection rate with the total deaths, cases and vaccinations it will be necessary to join
@@ -74,7 +74,7 @@ the *death* table with the *vaccination* table.
     GROUP BY "location"
     ORDER BY d.location;
 
-<li> **Considering <b>Brazil</b>, what looks likes the evolution of new cases and the percent of population vaccinated?** </li>
+<li> <b>Considering <b>Brazil</b>, what looks likes the evolution of new cases and the percent of population vaccinated?</b></li>
 
 To obtain this answer it will be necessary to use a View. We first create a View by selecting some basic information,
 like new vaccinations, deaths and cases, day by day. And then we create a partition by location to create a cumulative sum of the new
