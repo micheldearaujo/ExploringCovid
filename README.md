@@ -12,7 +12,7 @@ I hope to exercise and improve my SQL skills. Feel free to give your feedback. T
   </p>
 
 </div>
-<hr>
+
 
 ## The data 
 
@@ -22,11 +22,11 @@ other containing the vaccinations and other information.
 
 Deaths table
 <p align="center">
-<img width="1280" height="209" src="images/deaths.jpeg">
+<img width="1180" height="209" src="images/deaths.jpeg">
 
 Vaccination table
 <p align="center">
-<img width="1280" height="209" src="images/vaccines.jpeg">
+<img width="1180" height="209" src="images/vaccines.jpeg">
 
 
 
@@ -37,7 +37,7 @@ Vaccination table
 In this first part of the project will performed a simple exploratory data analysis on the data to discover some numbers about the COVID-19 pandemic in the World, and, specifically, in Brazil. <br>
 Summarising, the following questions were answered: <br>
 <ol>
-<li>What are the total cases, deaths and the <i>lethallity rate</i> (percent of people who died after get infected by COVID-19) in the world?</li>
+<li> **What are the total cases, deaths and the <i>lethallity rate</i> (percent of people who died after get infected by COVID-19) in the world?** </li>
 This question can be answered by simple querying the death table and make a division of the total cases and the new deaths.
 
     SELECT sum(new_cases::NUMERIC) AS "global_total_cases",
@@ -46,7 +46,7 @@ This question can be answered by simple querying the death table and make a divi
     FROM "Covid19".death
     WHERE continent IS NOT NULL;
 
-<li>Considering each of the continents, how many people have passed way until now (2021/07/21)?</li>
+<li> **Considering each of the continents, how many people have passed way until now (2021/07/21)?** </li>
 
 This question can be answered using a GROUP BY operation on the continent column. Note that it is necessary to imply the condition that the continent must be not null,
 for in this table some records brings the "location" as the continent, and when it happens, the "continent" column is null.
@@ -57,8 +57,11 @@ for in this table some records brings the "location" as the continent, and when 
     GROUP BY continent
     ORDER BY "total_deaths" DESC;
 
-<li>Until now, how much is the <i>infection rate</i> (percent of population that has been infect by COVID-19) country-wise?</li>
+<li> **Until now, what is the <i>infection rate</i> (percent of population that has been infect by COVID-19) country-wise?** </li>
 
+This question is not so different from the previous one. It is necessary to use a GROUP BY location. The new feature of this query
+is that if we want to see the relation of the infection rate with the total deaths, cases and vaccinations it will be necessary to join
+the *death* table with the *vaccination* table.
 
     SELECT d.location AS "country",
                     COALESCE(sum(new_deaths::NUMERIC), 0) AS "total_deaths",
@@ -71,7 +74,11 @@ for in this table some records brings the "location" as the continent, and when 
     GROUP BY "location"
     ORDER BY d.location;
 
-<li>Considering <b>Brazil</b>, what looks likes the evolution of new cases and the percent of population vaccinated?</li>
+<li> **Considering <b>Brazil</b>, what looks likes the evolution of new cases and the percent of population vaccinated?** </li>
+
+To obtain this answer it will be necessary to use a View. We first create a View by selecting some basic information,
+like new vaccinations, deaths and cases, day by day. And then we create a partition by location to create a cumulative sum of the new
+vaccinations.
 
     DROP VIEW if exists cum_vacc;
     CREATE VIEW cum_vacc AS 
@@ -102,11 +109,20 @@ For the visualization, it was exported the above queries answers in .xmlx format
 <p align="center">
 <img width="480" height="320" src="images/eda_dashboard.png">
 
-
-
 </p>
-
-  </p>
-
-</div>
+</div>``
 <hr>
+
+## Conclusion
+
+In this project we gained insights about the COVID-19 Pandemic. We saw global numbers like lethality rate, death rate and total deaths,
+as well as continent-wise number of deaths, death rate country-wise and how the COVID-19 evolved in Brazil throughout.
+
+It is possible to conclude, by visualizing the Dashboard, that countries physically isolated from the rest of the world
+have a much better isolation capability, for Oceania has presented the smallest number of deaths. It is also worthy to note that it takes
+some months after the vaccination begins to the new cases numbers starts to fell down. This insight shows us that we must stay at home even if we already
+had taken the first dose of vaccination, for it is not sufficient to break down the virus spreading.
+
+
+
+
