@@ -110,8 +110,8 @@ For the visualization, it was exported the above queries answers in .xmlx format
 <img width="480" height="320" src="images/eda_dashboard.png">
 
 </p>
-</div>``
-<hr>
+</div>
+
 
 ## Conclusion
 
